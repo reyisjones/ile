@@ -1,0 +1,17 @@
+# gitleaks configuration for ILE.
+# Extends the default ruleset and allowlists the committed environment
+# template, whose values are intentional placeholders (never real secrets).
+title = "ILE gitleaks config"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Ignore placeholder values in the .env.example template"
+paths = [
+  '''(^|/)\.env\.example$''',
+]
+regexes = [
+  '''change_this_[a-z_]+''',
+  '''change_this_to_a_long_random_string''',
+]
