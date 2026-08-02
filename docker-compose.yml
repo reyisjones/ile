@@ -1,0 +1,171 @@
+# =====================================================================
+# ILE — IKIGAI Learning Engine
+# Local-first Learning Operating System
+#
+# Profiles:
+#   (default)  postgres, api, metabase, backup
+#   ai         + ollama (local LLM)
+#   automation + n8n
+#
+# Usage:
+#   docker compose up -d                       # core stack
+#   docker compose --profile ai up -d          # core + local LLM
+#   docker compose --profile ai --profile automation up -d
+# =====================================================================
+
+name: ile
+
+services:
+  # -------------------------------------------------------------------
+  # PostgreSQL — primary structured store (system of record)
+  # -------------------------------------------------------------------
+  postgres:
+    image: postgres:16
+    container_name: ile-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - ./data/postgres:/var/lib/postgresql/data
+      - ./database/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - ile-net
+
+  # -------------------------------------------------------------------
+  # API — FastAPI application (domain logic, REST, orchestration)
+  # -------------------------------------------------------------------
+  api:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    container_name: ile-api
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      POSTGRES_HOST: ${POSTGRES_HOST:-postgres}
+      POSTGRES_PORT: ${POSTGRES_PORT:-5432}
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      API_SECRET_KEY: ${API_SECRET_KEY}
+      API_ACCESS_TOKEN_MINUTES: ${API_ACCESS_TOKEN_MINUTES:-1440}
+      API_SINGLE_USER_MODE: ${API_SINGLE_USER_MODE:-true}
+      API_LOG_LEVEL: ${API_LOG_LEVEL:-info}
+      OLLAMA_HOST: ${OLLAMA_HOST:-ollama}
+      OLLAMA_PORT: ${OLLAMA_PORT:-11434}
+      OLLAMA_CHAT_MODEL: ${OLLAMA_CHAT_MODEL:-llama3.1:8b}
+      OLLAMA_EMBED_MODEL: ${OLLAMA_EMBED_MODEL:-nomic-embed-text}
+      VAULT_PATH: /vault
+    ports:
+      - "${API_PORT:-8000}:8000"
+    volumes:
+      - ./vault:/vault
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+    networks:
+      - ile-net
+
+  # -------------------------------------------------------------------
+  # Metabase — analytics dashboards over Postgres
+  # -------------------------------------------------------------------
+  metabase:
+    image: metabase/metabase:latest
+    container_name: ile-metabase
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "${METABASE_PORT:-3000}:3000"
+    volumes:
+      - ./data/metabase:/metabase-data
+    environment:
+      MB_DB_FILE: ${MB_DB_FILE:-/metabase-data/metabase.db}
+    networks:
+      - ile-net
+
+  # -------------------------------------------------------------------
+  # Backup — daily pg_dump with retention
+  # -------------------------------------------------------------------
+  backup:
+    image: postgres:16
+    container_name: ile-backup
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      PGPASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_HOST: ${POSTGRES_HOST:-postgres}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_DB: ${POSTGRES_DB}
+      BACKUP_RETENTION_DAYS: ${BACKUP_RETENTION_DAYS:-30}
+      BACKUP_INTERVAL_SECONDS: ${BACKUP_INTERVAL_SECONDS:-86400}
+    volumes:
+      - ./data/backups:/backups
+      - ./scripts:/scripts:ro
+    entrypoint: ["/bin/bash", "-c"]
+    command:
+      - |
+        while true; do
+          /scripts/backup.sh || echo "backup failed";
+          sleep "${BACKUP_INTERVAL_SECONDS:-86400}";
+        done
+    networks:
+      - ile-net
+
+  # -------------------------------------------------------------------
+  # Ollama — local LLM runtime (profile: ai)
+  # -------------------------------------------------------------------
+  ollama:
+    image: ollama/ollama:latest
+    container_name: ile-ollama
+    restart: unless-stopped
+    profiles: ["ai"]
+    ports:
+      - "${OLLAMA_PORT:-11434}:11434"
+    volumes:
+      - ./data/ollama:/root/.ollama
+    networks:
+      - ile-net
+
+  # -------------------------------------------------------------------
+  # n8n — automation & scheduled jobs (profile: automation)
+  # -------------------------------------------------------------------
+  n8n:
+    image: n8nio/n8n:latest
+    container_name: ile-n8n
+    restart: unless-stopped
+    profiles: ["automation"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "${N8N_PORT:-5678}:5678"
+    environment:
+      N8N_BASIC_AUTH_ACTIVE: "true"
+      N8N_BASIC_AUTH_USER: ${N8N_BASIC_AUTH_USER:-ile}
+      N8N_BASIC_AUTH_PASSWORD: ${N8N_BASIC_AUTH_PASSWORD:-change_this_password}
+      GENERIC_TIMEZONE: UTC
+    volumes:
+      - ./data/n8n:/home/node/.n8n
+    networks:
+      - ile-net
+
+networks:
+  ile-net:
+    driver: bridge

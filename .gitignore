@@ -1,0 +1,38 @@
+# ---- Secrets & environment ----
+.env
+*.env
+!.env.example
+
+# ---- Runtime data (never commit) ----
+data/postgres/
+data/metabase/
+data/backups/
+data/ollama/
+data/n8n/
+
+# ---- Python ----
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# ---- Node (future web UI) ----
+node_modules/
+dist/
+.next/
+
+# ---- Obsidian workspace state ----
+vault/.obsidian/workspace*.json
+vault/.obsidian/cache/
+vault/.trash/
+
+# ---- OS / editor ----
+.DS_Store
+Thumbs.db
+*.log
