@@ -90,10 +90,19 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # full history so gitleaks scans all commits
       - name: Secret scan (gitleaks)
-        uses: gitleaks/gitleaks-action@v2
-        env:
-          GITLEAKS_ENABLE_UPLOAD_ARTIFACT: "false"
+        # Run the binary in git mode over full history for deterministic
+        # results. The diff-based action can fail with "stderr is not empty"
+        # even when no leaks are found. Honors .gitleaks.toml.
+        run: |
+          VERSION=8.24.3
+          curl -sSfL \
+            "https://github.com/gitleaks/gitleaks/releases/download/v${VERSION}/gitleaks_${VERSION}_linux_x64.tar.gz" \
+            | tar -xz -C /tmp gitleaks
+          /tmp/gitleaks detect --redact -v \
+            --config .gitleaks.toml --exit-code 1
       - name: Filesystem vulnerability scan (Trivy)
         uses: aquasecurity/trivy-action@v0.36.0
         with:
