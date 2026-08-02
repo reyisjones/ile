@@ -125,6 +125,18 @@ Then build the **Learning Command Center** dashboard in Metabase
   ```
 - For durability, copy `data/backups/` to an encrypted external drive / private cloud (3-2-1).
 
+## Export your data (own it)
+
+One command exports **everything** — every table as CSV **and** JSON, plus your
+Obsidian notes as Markdown — into `data/exports/` (and a `.tar.gz`):
+
+```bash
+./scripts/export.sh
+```
+
+Runs entirely locally; nothing is uploaded. Great for portability, migrations,
+or an extra off-device copy.
+
 ---
 
 ## Privacy & security

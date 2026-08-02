@@ -23,11 +23,19 @@ The **core platform stays open source (Apache 2.0) and local-first, forever.**
 - [x] Obsidian vault + templates
 - [x] Local-first, no telemetry, daily backups + restore
 - [x] Open-source governance, license, and legal/security docs
+- [x] pytest suite + CI (lint, tests, SQL validation, dependency/secret scan)
+- [x] SBOM generation in CI
+- [x] One-command data export (Markdown/JSON/CSV) — `scripts/export.sh`
 - [ ] Metabase starter dashboards shipped as importable JSON
-- [ ] pytest suite + CI (lint, tests, SQL validation, dependency/secret scan)
-- [ ] SBOM generation in CI
-- [ ] One-command data export (Markdown/JSON/CSV)
 - [ ] Getting-started screencast + docs polish
+
+### Phase 1 — remaining before the 0.1.x milestone closes
+- **Metabase starter dashboards (importable JSON).** Ship ready-made dashboards
+  (Learning Command Center, Retention, Interview Readiness) as importable files
+  built over the existing SQL views in `database/init/002_views.sql`.
+- **Getting-started screencast + docs polish.** A short end-to-end walkthrough
+  (clone → `docker compose up` → first learning loop) plus README/quick-start
+  refinements. The screencast is a manual recording task.
 
 ## Phase 2 — Intelligence, UX & Plugins
 

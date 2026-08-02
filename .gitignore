@@ -7,6 +7,7 @@
 data/postgres/
 data/metabase/
 data/backups/
+data/exports/
 data/ollama/
 data/n8n/
 

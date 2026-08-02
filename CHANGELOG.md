@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 ## [Unreleased]
 
 ### Added
+- Test suite: `api/tests/` with unit tests for the SM-2 retention scheduler,
+  Pydantic schema validation, and TestClient route/wiring checks (DB-free).
+- One-command data export: `scripts/export.sh` exports every table to CSV and
+  JSON and copies the Obsidian vault Markdown into `data/exports/` (+ archive).
 - Open-source publication package: `LICENSE` (Apache-2.0), `NOTICE`,
   `CODE_OF_CONDUCT.md`, `CONTRIBUTING.md`, `GOVERNANCE.md`, `SECURITY.md`,
   `SUPPORTED_VERSIONS.md`, `PRIVACY.md`, `TERMS.md`, `ROADMAP.md`.
@@ -16,6 +20,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   Impact Assessment, Security Architecture, Threat Model, Community Playbook,
   Plugin Development Guide, Licensing Guide, Deployment Guide, Release &
   Versioning, Incident Response & DR, Product Positioning, Publication Checklist.
+
+### Fixed
+- CI: corrected the Trivy action tag and pinned a version whose `setup-trivy`
+  dependency resolves; added a gitleaks allowlist for `.env.example`
+  placeholders so the security scan passes.
 
 ## [0.1.0] — 2026-08-02
 
