@@ -1,0 +1,33 @@
+ILE — IKIGAI Learning Engine
+Copyright 2026 TECHTARIS LLC and the ILE contributors
+
+This product includes software developed by the ILE open-source community.
+
+Licensed under the Apache License, Version 2.0 (the "License"); you may not
+use the files in this project except in compliance with the License. You may
+obtain a copy of the License in the LICENSE file or at:
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+------------------------------------------------------------------------------
+Third-party components
+------------------------------------------------------------------------------
+ILE is designed to run alongside the following independent open-source
+projects, each distributed under its own license. ILE does not modify or
+redistribute them; they are pulled as container images or dependencies at
+deploy time:
+
+  - PostgreSQL              (PostgreSQL License)
+  - Metabase                (AGPL-3.0 / Enterprise) — run as a separate service
+  - Ollama                  (MIT)
+  - n8n                     (Sustainable Use License) — optional profile
+  - FastAPI, SQLAlchemy,
+    Pydantic, Uvicorn,
+    httpx, psycopg          (MIT / BSD / Apache-2.0)
+  - Obsidian                (proprietary, free for personal use) — host app;
+                             ILE only reads/writes plain Markdown in a vault.
+
+See docs/12-Licensing-Guide.md for the full dependency license inventory and
+the compatibility rationale (notably why Metabase's AGPL scope is limited to
+the separately deployed analytics container and does not affect ILE's
+Apache-2.0 licensing).

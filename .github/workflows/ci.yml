@@ -1,0 +1,118 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  # -----------------------------------------------------------------
+  # Lint & type-check the API
+  # -----------------------------------------------------------------
+  api-lint:
+    name: API lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install tooling
+        run: pip install ruff
+      - name: Ruff (lint)
+        run: ruff check api
+      - name: Ruff (format check)
+        run: ruff format --check api
+
+  # -----------------------------------------------------------------
+  # Compile + (future) tests
+  # -----------------------------------------------------------------
+  api-test:
+    name: API build & test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install dependencies
+        run: pip install -r api/requirements.txt pytest
+      - name: Byte-compile
+        run: python -m compileall -q api/app
+      - name: Run tests (if present)
+        run: |
+          if [ -d api/tests ]; then pytest -q api/tests; \
+          else echo "No tests yet — skipping (see ROADMAP Phase 1)."; fi
+
+  # -----------------------------------------------------------------
+  # Validate database init scripts against a real Postgres
+  # -----------------------------------------------------------------
+  db-validate:
+    name: Database init validation
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: ile
+          POSTGRES_USER: ile_admin
+          POSTGRES_PASSWORD: test
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U ile_admin -d ile"
+          --health-interval 10s --health-timeout 5s --health-retries 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Apply init scripts
+        env:
+          PGPASSWORD: test
+        run: |
+          for f in database/init/*.sql; do
+            echo "Applying $f";
+            psql -h localhost -U ile_admin -d ile -v ON_ERROR_STOP=1 -f "$f";
+          done
+      - name: Sanity check seeded objects
+        env:
+          PGPASSWORD: test
+        run: |
+          psql -h localhost -U ile_admin -d ile -tAc \
+            "SELECT count(*) FROM xp_rules;" | grep -qE '^[1-9]'
+
+  # -----------------------------------------------------------------
+  # Security & supply chain
+  # -----------------------------------------------------------------
+  security:
+    name: Security scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Secret scan (gitleaks)
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITLEAKS_ENABLE_UPLOAD_ARTIFACT: "false"
+      - name: Filesystem vulnerability scan (Trivy)
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          scan-type: fs
+          scanners: vuln,misconfig,secret
+          severity: CRITICAL,HIGH
+          exit-code: "0" # report-only for now; flip to 1 to enforce
+
+  # -----------------------------------------------------------------
+  # SBOM generation (published as a build artifact)
+  # -----------------------------------------------------------------
+  sbom:
+    name: Generate SBOM
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Generate SBOM (Syft, SPDX JSON)
+        uses: anchore/sbom-action@v0
+        with:
+          path: .
+          format: spdx-json
+          artifact-name: ile-sbom.spdx.json

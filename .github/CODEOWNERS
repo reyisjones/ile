@@ -1,0 +1,21 @@
+# These owners are requested for review when someone opens a pull request.
+# Order matters: the last matching pattern takes precedence.
+
+# Default owners for everything
+*                       @techtaris/maintainers
+
+# Area owners
+/api/                   @techtaris/api-maintainers
+/database/              @techtaris/db-maintainers
+/scripts/               @techtaris/infra-maintainers
+/docker-compose.yml     @techtaris/infra-maintainers
+/docs/                  @techtaris/docs-maintainers
+/vault/                 @techtaris/docs-maintainers
+
+# Governance & legal require broad review
+/LICENSE                @techtaris/steering
+/NOTICE                 @techtaris/steering
+/GOVERNANCE.md          @techtaris/steering
+/SECURITY.md            @techtaris/security
+/PRIVACY.md             @techtaris/steering
+/TERMS.md               @techtaris/steering

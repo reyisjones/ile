@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 🔒 Report a security vulnerability
+    url: https://github.com/techtaris/ile/security/advisories/new
+    about: Please report vulnerabilities privately. See SECURITY.md — do not open a public issue.
+  - name: 💬 Questions & discussion
+    url: https://github.com/techtaris/ile/discussions
+    about: Ask questions, share setups, and discuss ideas with the community.
+  - name: 📓 RFC (larger proposals)
+    url: https://github.com/techtaris/ile/discussions/categories/rfcs
+    about: Propose significant changes via the RFC process.

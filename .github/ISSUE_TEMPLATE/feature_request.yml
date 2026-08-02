@@ -1,0 +1,50 @@
+name: Feature request
+description: Suggest an idea or improvement
+title: "[feat]: "
+labels: ["enhancement", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for the idea! For large or architectural changes, please read the
+        [RFC process](../blob/main/docs/16-Community-Playbook.md) first.
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem / motivation
+      description: What are you trying to achieve? What's the pain today?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+  - type: dropdown
+    id: alignment
+    attributes:
+      label: Which core value does this serve?
+      description: See CONTRIBUTING.md → Project principles.
+      multiple: true
+      options:
+        - Local-first & private by default
+        - Purpose over activity (IKIGAI/validation)
+        - Simple MVP, extensible core
+        - Separation of domains
+        - User owns their data
+    validations:
+      required: true
+  - type: checkboxes
+    id: scope
+    attributes:
+      label: Scope check
+      options:
+        - label: This keeps the core focused (Learning, Knowledge, IKIGAI, Interview) or is proposed as a plugin.
+          required: true
+        - label: This does not add a mandatory cloud dependency or telemetry.
+          required: true
