@@ -82,6 +82,7 @@ under its license. If a fully-OSI stack is required, users can disable the
 `automation` profile; core ILE does not depend on n8n.
 
 ## 7. Trademark
+<a id="trademark"></a>
 
 The **code** is Apache-2.0, but the Apache License **does not grant trademark
 rights** (License §6). The names **"ILE"** and **"IKIGAI Learning Engine"** and

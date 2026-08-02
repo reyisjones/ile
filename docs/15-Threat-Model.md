@@ -58,6 +58,7 @@ Default deployment is **localhost-only**, which eliminates most remote actors.
    capabilities, resource limits, updated base images. (EoP.)
 
 ## 5. OWASP Top 10 mapping
+<a id="owasp-top-10-mapping"></a>
 
 | OWASP (2021) | Status / control |
 |---|---|
